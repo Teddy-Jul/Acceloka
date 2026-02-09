@@ -1,0 +1,69 @@
+# Visual Studio / .NET
+.vs/
+.vscode/
+.idea/
+
+# Build artifacts
+[Bb]in/
+[Oo]bj/
+artifacts/
+publish/
+out/
+
+# Rider / ReSharper
+_ReSharper*/
+*.DotSettings.user
+
+# User-specific files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.csproj.user
+*.dbmdl
+
+# NuGet
+packages/
+*.nupkg
+project.lock.json
+project.fragment.lock.json
+
+# Logs (including Serilog rolling files used in Program.cs)
+logs/
+logs/Log-*.txt
+*.log
+
+# Test results
+TestResults/
+*.trx
+*.coverage
+*.coveragexml
+
+# Database files
+*.mdf
+*.ldf
+*.sqlite
+*.db
+*.db-journal
+
+# Entity Framework migrations snapshots and tooling leftovers
+efmigrations/
+*.efmigrationshistory
+
+# Deployment / publish output
+*.publishsettings
+*.azurePubxml
+*.deployproj
+
+# Misc
+*.class
+*.cache
+*.vsix
+*.bak
+*.orig
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
