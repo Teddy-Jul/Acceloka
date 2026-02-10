@@ -170,7 +170,7 @@ namespace Acceloka.Services
                 }
             }
 
-            
+
             using var transaction = await _db.Database.BeginTransactionAsync();
             try
             {
@@ -276,7 +276,7 @@ namespace Acceloka.Services
                             TicketName = btd.Ticket.TicketName,
                             EventDate = btd.Ticket.EventDate,
                             TicketAmmount = btd.Quantity
-                            
+
                         }).ToList()
                     }).ToList()
             };
@@ -298,6 +298,97 @@ namespace Acceloka.Services
             {
                 BookedTickets = bookedTickets
             };
+
+        }
+        public async Task<RevokeTicketResponse> RevokeTicket(int bookedTicketId, string ticketCode, int quantity)
+        {
+            using var transaction = await _db.Database.BeginTransactionAsync();
+            try
+            {
+                // Validasi adanya BookedTicketId
+                var bookedTicket = await _db.BookedTickets
+                    .Include(bt => bt.BookedTicketDetails)
+                        .ThenInclude(btd => btd.Ticket)
+                            .ThenInclude(t => t.Category)
+                    .FirstOrDefaultAsync(bt => bt.BookedTicketId == bookedTicketId);
+
+                if (bookedTicket == null)
+                {
+                    throw new KeyNotFoundException($"BookedTicketId {bookedTicketId} tidak terdaftar");
+                }
+
+                // Validasi Kode Ticket dalam Booking
+                var bookedDetail = bookedTicket.BookedTicketDetails
+                    .FirstOrDefault(btd => btd.Ticket.TicketCode == ticketCode);
+
+                if (bookedDetail == null)
+                {
+                    throw new KeyNotFoundException($"Kode tiket {ticketCode} tidak terdaftar dalam BookedTicketId {bookedTicketId}");
+                }
+
+                // Validasi Quantity harus <= quantity yang sudah dibooking
+                if (quantity > bookedDetail.Quantity)
+                {
+                    throw new InvalidOperationException(
+                        $"Quantity yang akan direvoke ({quantity}) melebihi quantity yang dibooking ({bookedDetail.Quantity}) untuk tiket {ticketCode}");
+                }
+
+                // Update RemainingQuota di tabel Tickets (mengembalikan quota)
+                var ticket = bookedDetail.Ticket;
+                ticket.RemainingQuota += quantity;
+                ticket.UpdatedAt = DateTimeOffset.Now;
+
+                // Update atau hapus BookedTicketDetail
+                if (quantity == bookedDetail.Quantity)
+                {
+                    // Hapus row jika quantity menjadi 0
+                    _db.BookedTicketDetails.Remove(bookedDetail);
+                }
+                else
+                {
+                    // Update quantity jika masih ada sisa
+                    bookedDetail.Quantity -= quantity;
+                    bookedDetail.Price = ticket.Price * bookedDetail.Quantity;
+                    bookedDetail.UpdatedAt = DateTimeOffset.Now;
+                }
+
+                await _db.SaveChangesAsync();
+
+                // Cek apakah masih ada detail lain di BookedTicket ini
+                var remainingDetails = await _db.BookedTicketDetails
+                    .Include(btd => btd.Ticket)
+                        .ThenInclude(t => t.Category)
+                    .Where(btd => btd.BookedTicketId == bookedTicketId)
+                    .ToListAsync();
+
+                // Jika tidak ada detail lagi, hapus BookedTicket
+                if (!remainingDetails.Any())
+                {
+                    _db.BookedTickets.Remove(bookedTicket);
+                    await _db.SaveChangesAsync();
+                }
+
+                await transaction.CommitAsync();
+
+                // Response : tampilkan sisa tiket yang masih dibooking
+                var response = new RevokeTicketResponse
+                {
+                    RemainingTicket = remainingDetails.Select(btd => new RevokeTicketItem
+                    {
+                        TicketCode = btd.Ticket.TicketCode,
+                        TicketName = btd.Ticket.TicketName,
+                        CategoryName = btd.Ticket.Category.CategoryName,
+                        RemainingQuantity = btd.Quantity
+                    }).ToList()
+                };
+
+                return response;
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
 
         }
     }

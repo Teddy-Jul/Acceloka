@@ -1,5 +1,6 @@
 ﻿namespace Acceloka.Model
 {
+    // GET/api/v1/get-booked-ticket/id
     public class GetBookedTicketResponse
     {
         public List<BookedTicketCategoryGroup> Categories { get; set; } = new List<BookedTicketCategoryGroup>();
@@ -19,7 +20,7 @@
         public DateTimeOffset EventDate { get; set; }
         public int TicketAmmount { get; set; }
     }
-
+    // Get /api/v1/get-all-booked-tickets
     public class GetAllBookedTicketsResponse
     {
         public List<BookedTicketSummary> BookedTickets { get; set; } = new List<BookedTicketSummary>();
@@ -30,5 +31,17 @@
         public DateTimeOffset BookingDate { get; set; }
         public int TotalTickets { get; set; }
         public int TotalQuantity { get; set; }
+    }
+    public class RevokeTicketResponse 
+    {
+        public List<RevokeTicketItem> RemainingTicket { get; set; } = new List<RevokeTicketItem>();
+    }
+
+    public class RevokeTicketItem
+    {
+        public string TicketCode { get; set; } = string.Empty;
+        public string TicketName { get; set; } = string.Empty;
+        public string CategoryName { get; set; } = string.Empty;
+        public int RemainingQuantity { get; set; }
     }
 }

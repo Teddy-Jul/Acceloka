@@ -65,5 +65,15 @@ namespace Acceloka.Controllers
             var result = await _service.GetBookedTicketDetail(bookedTicketId);
             return Ok(result);
         }
+
+        [HttpDelete("revoke-ticket/{bookedTicketId}/{ticketCode}/{quantity}")]
+        public async Task<IActionResult> RevokeTicket(
+            [FromRoute] int bookedTicketId,
+            [FromRoute] string ticketCode,
+            [FromRoute] int quantity)
+        {
+            var result = await _service.RevokeTicket(bookedTicketId, ticketCode, quantity);
+            return Ok(result);
+        }
     }
 }

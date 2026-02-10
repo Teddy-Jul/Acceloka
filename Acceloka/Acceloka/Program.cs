@@ -28,7 +28,7 @@ builder.Services.AddSwaggerGen(c =>
 
 // Configure Problem Details (RFC 7807)
 builder.Services.AddProblemDetails(options =>
-{
+{ 
     options.IncludeExceptionDetails = (ctx, ex) => builder.Environment.IsDevelopment();
     
     options.MapToStatusCode<ArgumentException>(StatusCodes.Status400BadRequest);
@@ -55,9 +55,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 
-    app.UseSerilogRequestLogging();
-    app.UseAuthorization();
-    app.MapControllers();
-
-    app.Run();
 }
+
+app.UseSerilogRequestLogging();
+app.UseAuthorization();
+app.MapControllers();
+
+app.Run();
