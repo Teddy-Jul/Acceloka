@@ -28,7 +28,7 @@ packages/
 project.lock.json
 project.fragment.lock.json
 
-# Logs (including Serilog rolling files used in Program.cs)
+# Logs (including Serilog rolling files)
 logs/
 logs/Log-*.txt
 *.log

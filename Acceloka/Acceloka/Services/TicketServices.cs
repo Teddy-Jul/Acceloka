@@ -246,5 +246,59 @@ namespace Acceloka.Services
                 throw;
             }
         }
+        public async Task<GetBookedTicketResponse> GetBookedTicketDetail(int bookedTicketId)
+        {
+            // Ambil data BookedTicket beserta detailnya
+            var bookedTicket = await _db.BookedTickets
+                .Include(bt => bt.BookedTicketDetails)
+                    .ThenInclude(btd => btd.Ticket)
+                        .ThenInclude(t => t.Category)
+                .FirstOrDefaultAsync(bt => bt.BookedTicketId == bookedTicketId);
+
+            // Validasi apakah BookedTicketId ada
+            if (bookedTicket == null)
+            {
+                throw new KeyNotFoundException($"BookedTicketId {bookedTicketId} tidak terdaftar");
+            }
+
+            // Group by Category dan hitung total quantity per kategori
+            var response = new GetBookedTicketResponse
+            {
+                Categories = bookedTicket.BookedTicketDetails
+                    .GroupBy(btd => btd.Ticket.Category.CategoryName)
+                    .Select(categoryGroup => new BookedTicketCategoryGroup
+                    {
+                        QtyPerCategory = categoryGroup.Sum(btd => btd.Quantity),
+                        CategoryName = categoryGroup.Key,
+                        Tickets = categoryGroup.Select(btd => new BookedTicketDetailInfo
+                        {
+                            TicketCode = btd.Ticket.TicketCode,
+                            TicketName = btd.Ticket.TicketName,
+                            EventDate = btd.Ticket.EventDate,
+                            TicketAmmount = btd.Quantity
+                            
+                        }).ToList()
+                    }).ToList()
+            };
+
+            return response;
+        }
+        public async Task<GetAllBookedTicketsResponse> GetAllBookedTickets()
+        {
+            var bookedTickets = await _db.BookedTickets
+                .Include(bt => bt.BookedTicketDetails)
+                .OrderByDescending(bt => bt.BookingDate)
+                .Select(bt => new BookedTicketSummary
+                {
+                    BookedTicketId = bt.BookedTicketId,
+                    BookingDate = bt.BookingDate,
+                    TotalTickets = bt.BookedTicketDetails.Sum(btd => btd.Quantity)
+                }).ToListAsync();
+            return new GetAllBookedTicketsResponse
+            {
+                BookedTickets = bookedTickets
+            };
+
+        }
     }
 }

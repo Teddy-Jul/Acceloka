@@ -1,6 +1,7 @@
 ﻿using Acceloka.Model;
 using Acceloka.Services;
 using Microsoft.AspNetCore.Mvc;
+using System.Runtime.InteropServices;
 
 namespace Acceloka.Controllers
 {
@@ -48,6 +49,20 @@ namespace Acceloka.Controllers
         public async Task<IActionResult> BookTicket([FromBody] BookTicketRequest request)
         {
             var result = await _service.BookTicket(request);
+            return Ok(result);
+        }
+
+        [HttpGet("get-all-booked-tickets")]
+        public async Task<IActionResult> GetAllBookedTickets()
+        {
+            var result = await _service.GetAllBookedTickets();
+            return Ok(result);
+        }
+
+        [HttpGet("get-booked-ticket/{bookedTicketId}")]
+        public async Task<IActionResult> GetBookedTicket([FromRoute] int bookedTicketId)
+        {
+            var result = await _service.GetBookedTicketDetail(bookedTicketId);
             return Ok(result);
         }
     }
