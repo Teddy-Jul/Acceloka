@@ -41,6 +41,14 @@ namespace Acceloka.Controllers
                 pageSize);
 
             return Ok(data);
+        }   
+        
+        [HttpPost("book-ticket")]
+
+        public async Task<IActionResult> BookTicket([FromBody] BookTicketRequest request)
+        {
+            var result = await _service.BookTicket(request);
+            return Ok(result);
         }
     }
 }
