@@ -1,6 +1,6 @@
 ﻿namespace Acceloka.Model
 {
-    // GET/api/v1/get-booked-ticket/id
+    // GET/api/v1/get-booked-ticket/bookedticketid
     public class GetBookedTicketResponse
     {
         public List<BookedTicketCategoryGroup> Categories { get; set; } = new List<BookedTicketCategoryGroup>();
@@ -32,12 +32,36 @@
         public int TotalTickets { get; set; }
         public int TotalQuantity { get; set; }
     }
+
+    // Delete /api/v1/revoke-booked-ticket/bookedticketid
     public class RevokeTicketResponse 
     {
         public List<RevokeTicketItem> RemainingTicket { get; set; } = new List<RevokeTicketItem>();
     }
 
     public class RevokeTicketItem
+    {
+        public string TicketCode { get; set; } = string.Empty;
+        public string TicketName { get; set; } = string.Empty;
+        public string CategoryName { get; set; } = string.Empty;
+        public int RemainingQuantity { get; set; }
+    }
+
+    // Put /api/v1/edit-booked-ticket/bookedticketid
+    public class EditBookedTicketRequest
+    {
+        public List<EditBookedTicketItem> Items { get; set; } = new List<EditBookedTicketItem>();
+    }
+    public class EditBookedTicketItem
+    {
+        public string TicketCode { get; set; } = string.Empty;
+        public int Quantity { get; set; }
+    }
+    public class EditBookedTicketResponse
+    {
+        public List<EditedTicketInfo> EditedTickets { get; set; } = new List<EditedTicketInfo>();
+    }
+    public class EditedTicketInfo
     {
         public string TicketCode { get; set; } = string.Empty;
         public string TicketName { get; set; } = string.Empty;

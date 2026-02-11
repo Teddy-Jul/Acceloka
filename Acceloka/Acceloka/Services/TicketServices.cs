@@ -391,5 +391,85 @@ namespace Acceloka.Services
             }
 
         }
+        public async Task<EditBookedTicketResponse> EditBookedTicket(int bookedTicketId, EditBookedTicketRequest request)
+        {
+            using var transaction = await _db.Database.BeginTransactionAsync();
+            try
+            {
+                // Validasi adanya BookedTicketId
+                var bookedTicket = await _db.BookedTickets
+                    .Include(bt => bt.BookedTicketDetails)
+                    .ThenInclude(btd => btd.Ticket)
+                    .ThenInclude(t => t.Category)
+                    .FirstOrDefaultAsync(bt => bt.BookedTicketId == bookedTicketId);
+                if(bookedTicket == null)
+                {
+                    throw new KeyNotFoundException($"BookedTicketId {bookedTicketId} tidak terdaftar");
+                }
+                var editedTickets = new List<EditedTicketInfo>();
+                foreach (var item in request.Items)
+                {
+                    // Validasi Kode Ticket dalam Booking
+                    var bookedDetail = bookedTicket.BookedTicketDetails
+                        .FirstOrDefault(btd => btd.Ticket.TicketCode == item.TicketCode);
+                    if (bookedDetail == null)
+                    {
+                        throw new KeyNotFoundException($"Kode tiket {item.TicketCode} tidak terdaftar dalam BookedTicketId {bookedTicketId}");
+                    }
+
+                    // Validasi Quantity tidak boleh kurang dari 1
+                    if (item.Quantity < 1)
+                    {
+                        throw new InvalidOperationException($"Quantity tidak boleh kurang dari 0 untuk tiket {item.TicketCode}");
+                    }
+
+                    // Max Ticket Quantity yang boleh di booking
+                    var ticket = bookedDetail.Ticket;
+                    var maxAllowedQuantity = bookedDetail.Quantity + ticket.RemainingQuota;
+
+                    // Validasi Quantitiy tidak boleh melebihi sisa quota
+                    if (item.Quantity > maxAllowedQuantity)
+                    {
+                        throw new InvalidOperationException($"Quantity untuk {item.TicketCode} melebihi sisa quota. Maksimal yang diperbolehkan: {maxAllowedQuantity}, diminta: {item.Quantity}");
+                    }
+
+                    // perubahan quantity
+                    var quantityDif = item.Quantity - bookedDetail.Quantity;
+
+                    // update RemainingQuota
+                    // Jika quantity naik, quota berkurang, vice versa
+                    ticket.RemainingQuota -= quantityDif;
+                    ticket.UpdatedAt = DateTimeOffset.Now;
+
+                    // Update BookedTicketDetail
+                    bookedDetail.Quantity = item.Quantity;
+                    bookedDetail.Price = ticket.Price * bookedDetail.Quantity;
+                    bookedDetail.UpdatedAt = DateTimeOffset.Now;
+
+                    // Tambahkan ke list untuk response
+                    editedTickets.Add(new EditedTicketInfo
+                    {
+                        TicketCode = ticket.TicketCode,
+                        TicketName = ticket.TicketName,
+                        CategoryName = ticket.Category.CategoryName,
+                        RemainingQuantity = ticket.RemainingQuota
+                    });
+                }
+
+                await _db.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                return new EditBookedTicketResponse
+                {
+                    EditedTickets = editedTickets
+                };
+
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        }
     }
 }

@@ -75,5 +75,14 @@ namespace Acceloka.Controllers
             var result = await _service.RevokeTicket(bookedTicketId, ticketCode, quantity);
             return Ok(result);
         }
+
+        [HttpPut("edit-booked-ticket/{bookedTicketId}")]
+        public async Task<IActionResult> EditBookedTicket(
+            [FromRoute] int bookedTicketId,
+            [FromBody] EditBookedTicketRequest request)
+        {
+            var result = await _service.EditBookedTicket(bookedTicketId, request);
+            return Ok(result);
+        }
     }
 }
