@@ -1,7 +1,10 @@
-﻿using Acceloka.Model;
-using Acceloka.Services;
+﻿using Acceloka.Features.AvalaibleTickets.Queries;
+using Acceloka.Features.BookTicket.Commands;
+using Acceloka.Features.BookedTickets.Queries;
+using Acceloka.Features.EditBookedTicket.Commands;
+using Acceloka.Features.RevokeTicket.Commands;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using System.Runtime.InteropServices;
 
 namespace Acceloka.Controllers
 {
@@ -9,60 +12,64 @@ namespace Acceloka.Controllers
     [ApiController]
     public class TicketsController : ControllerBase
     {
-        private readonly TicketServices _service;
+        private readonly IMediator _mediator;
 
-        public TicketsController(TicketServices service)
+        public TicketsController(IMediator mediator)
         {
-            _service = service;
+            _mediator = mediator;
         }
 
         [HttpGet("get-available-ticket")]
         public async Task<IActionResult> GetAvailableTicket(
-            [FromQuery] string? namaKategori,
-            [FromQuery] string? kodeTicket,
-            [FromQuery] string? namaTicket,
-            [FromQuery] decimal? harga,
-            [FromQuery] DateTimeOffset? tanggalEventMinimal,
-            [FromQuery] DateTimeOffset? tanggalEventMaksimal,
-            [FromQuery] string orderBy = "KodeTicket",
+            [FromQuery] string? categoryName,
+            [FromQuery] string? ticketCode,
+            [FromQuery] string? ticketName,
+            [FromQuery] decimal? price,
+            [FromQuery] DateTimeOffset? minEventDate,
+            [FromQuery] DateTimeOffset? maxEventDate,
+            [FromQuery] string orderBy = "TicketCode",
             [FromQuery] string orderState = "ascending",
-            [FromQuery] int page = 1,       // default page 1
-            [FromQuery] int pageSize = 10)  // default max show in 1 page = 10
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10)
         {
-            var data = await _service.GetAvailableTickets(
-                namaKategori,
-                kodeTicket,
-                namaTicket,
-                harga,
-                tanggalEventMinimal, 
-                tanggalEventMaksimal,
-                orderBy, 
-                orderState,
-                page, 
-                pageSize);
+            var query = new GetAvailableTicketsQuery
+            {
+                CategoryName = categoryName,
+                TicketCode = ticketCode,
+                TicketName = ticketName,
+                Price = price,
+                MinEventDate = minEventDate,
+                MaxEventDate = maxEventDate,
+                OrderBy = orderBy,
+                OrderState = orderState,
+                Page = page,
+                PageSize = pageSize
+            };
 
+            var data = await _mediator.Send(query);
             return Ok(data);
-        }   
-        
-        [HttpPost("book-ticket")]
+        }
 
-        public async Task<IActionResult> BookTicket([FromBody] BookTicketRequest request)
+        [HttpPost("book-ticket")]
+        public async Task<IActionResult> BookTicket([FromBody] BookTicketCommand command)
         {
-            var result = await _service.BookTicket(request);
+            var result = await _mediator.Send(command);
             return Ok(result);
         }
 
         [HttpGet("get-all-booked-tickets")]
         public async Task<IActionResult> GetAllBookedTickets()
         {
-            var result = await _service.GetAllBookedTickets();
+            var query = new GetAllBookedTicketsQuery();
+            var result = await _mediator.Send(query);
             return Ok(result);
         }
 
         [HttpGet("get-booked-ticket/{bookedTicketId}")]
         public async Task<IActionResult> GetBookedTicket([FromRoute] int bookedTicketId)
         {
-            var result = await _service.GetBookedTicketDetail(bookedTicketId);
+            var query = new GetBookedTicketDetailQuery { BookedTicketId = bookedTicketId };
+            var result = await _mediator.Send(query);
             return Ok(result);
         }
 
@@ -72,16 +79,24 @@ namespace Acceloka.Controllers
             [FromRoute] string ticketCode,
             [FromRoute] int quantity)
         {
-            var result = await _service.RevokeTicket(bookedTicketId, ticketCode, quantity);
+            var command = new RevokeTicketCommand
+            {
+                BookedTicketId = bookedTicketId,
+                TicketCode = ticketCode,
+                Quantity = quantity
+            };
+
+            var result = await _mediator.Send(command);
             return Ok(result);
         }
 
         [HttpPut("edit-booked-ticket/{bookedTicketId}")]
         public async Task<IActionResult> EditBookedTicket(
             [FromRoute] int bookedTicketId,
-            [FromBody] EditBookedTicketRequest request)
+            [FromBody] EditBookedTicketCommand command)
         {
-            var result = await _service.EditBookedTicket(bookedTicketId, request);
+            command.BookedTicketId = bookedTicketId;
+            var result = await _mediator.Send(command);
             return Ok(result);
         }
     }

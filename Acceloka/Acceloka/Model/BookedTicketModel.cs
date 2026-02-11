@@ -1,5 +1,6 @@
 ﻿namespace Acceloka.Model
 {
+    // POST /api/book-tickets
     public class BookTicketRequest
     {
         public List<BookTicketItem> Items { get; set; } = new List<BookTicketItem>();

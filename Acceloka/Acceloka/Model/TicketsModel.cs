@@ -1,13 +1,14 @@
 ﻿namespace Acceloka.Model
 {
+    // GET /api/v1/get-avalaible-ticket
     public class AvailableTicketResponse
     {
-        public string NamaKategori { get; set; } = string.Empty;
-        public string KodeTicket { get; set; } = string.Empty;
-        public string NamaTicket { get; set; } = string.Empty;
-        public DateTimeOffset TanggalEvent { get; set; }
-        public decimal Harga { get; set; }
-        public int SisaQuota { get; set; }
+        public string CategoryName { get; set; } = string.Empty;
+        public string TicketCode { get; set; } = string.Empty;
+        public string TicketName { get; set; } = string.Empty;
+        public DateTimeOffset EventDate { get; set; }
+        public decimal Price { get; set; }
+        public int RemainingQuota { get; set; }
     }
 
     // Response dengan Pagination

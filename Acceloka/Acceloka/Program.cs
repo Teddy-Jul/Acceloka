@@ -1,12 +1,14 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Acceloka.Entities;
-using Acceloka.Services;
+using Acceloka.Common.Behaviors;
 using Hellang.Middleware.ProblemDetails;
+using FluentValidation;
+using MediatR;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configure Serilog
+// Serilog
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Information()
     .WriteTo.File("logs/Log-.txt", rollingInterval: RollingInterval.Day)
@@ -26,6 +28,15 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
+// MediatR
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
+
+// FluentValidation
+builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
+
+// FluentValidation Pipeline Behavior
+builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+
 // Configure Problem Details (RFC 7807)
 builder.Services.AddProblemDetails(options =>
 { 
@@ -33,6 +44,7 @@ builder.Services.AddProblemDetails(options =>
     
     options.MapToStatusCode<ArgumentException>(StatusCodes.Status400BadRequest);
     options.MapToStatusCode<InvalidOperationException>(StatusCodes.Status400BadRequest);
+    options.MapToStatusCode<ValidationException>(StatusCodes.Status400BadRequest);
     options.MapToStatusCode<KeyNotFoundException>(StatusCodes.Status404NotFound);
     options.MapToStatusCode<Exception>(StatusCodes.Status500InternalServerError);
 });
@@ -43,19 +55,12 @@ builder.Services.AddDbContextPool<AccelokaContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("SQLServerDB"));
 });
 
-builder.Services.AddTransient<TicketServices>();
-
 var app = builder.Build();
 
 app.UseProblemDetails();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-
-}
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseSerilogRequestLogging();
 app.UseAuthorization();
