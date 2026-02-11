@@ -17,7 +17,7 @@ namespace Acceloka.Features.AvalaibleTickets.Queries
         public async Task<PagedResult<AvailableTicketResponse>> Handle(GetAvailableTicketsQuery request, CancellationToken cancellationToken)
         {
             var query = _db.Tickets.Include(t => t.Category).AsQueryable();
-
+            query = query.Where(t => t.RemainingQuota > 0);
             // Filter
             if (!string.IsNullOrWhiteSpace(request.CategoryName))
             {

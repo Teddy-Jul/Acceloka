@@ -54,7 +54,7 @@ namespace Acceloka.Controllers
         public async Task<IActionResult> BookTicket([FromBody] BookTicketCommand command)
         {
             var result = await _mediator.Send(command);
-            return Ok(result);
+            return Created("",result);
         }
 
         [HttpGet("get-all-booked-tickets")]

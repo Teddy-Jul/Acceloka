@@ -30,7 +30,6 @@
         public int BookedTicketId { get; set; }
         public DateTimeOffset BookingDate { get; set; }
         public int TotalTickets { get; set; }
-        public int TotalQuantity { get; set; }
     }
 
     // Delete /api/v1/revoke-booked-ticket/bookedticketid
