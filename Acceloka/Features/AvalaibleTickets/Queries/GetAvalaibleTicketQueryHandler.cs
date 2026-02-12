@@ -67,7 +67,7 @@ namespace Acceloka.Features.AvalaibleTickets.Queries
             // Execute query
             var tickets = await query.ToListAsync(cancellationToken);
 
-            // Map to response
+            // response data tickets
             var data = tickets.Select(t => new AvailableTicketResponse
             {
                 CategoryName = t.Category.CategoryName,
@@ -78,7 +78,7 @@ namespace Acceloka.Features.AvalaibleTickets.Queries
                 RemainingQuota = t.RemainingQuota
             }).ToList();
 
-            // Calculate pagination info
+            // menghitung total pages
             var totalPages = (int)Math.Ceiling(totalCount / (double)request.PageSize);
 
             return new PagedResult<AvailableTicketResponse>
