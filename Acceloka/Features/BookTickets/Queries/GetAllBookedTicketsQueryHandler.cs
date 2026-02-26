@@ -20,7 +20,7 @@ namespace Acceloka.Features.BookedTickets.Queries
             var bookedTickets = await _db.BookedTickets
                 .Include(bt => bt.BookedTicketDetails)
                 .Where(bt => bt.UserId == request.UserId)
-                .OrderByDescending(bt => bt.BookingDate)
+                .OrderBy(bt => bt.BookingDate)
                 .Select(bt => new BookedTicketSummary
                 {
                     BookedTicketId = bt.BookedTicketId,
