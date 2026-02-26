@@ -28,6 +28,17 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
+// CORS Configuration for Frontend
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins("http://localhost:3000", "http://localhost:3001")
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
+
 // MediatR
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
 
@@ -63,6 +74,7 @@ app.UseSwagger();
 app.UseSwaggerUI();
 
 app.UseSerilogRequestLogging();
+app.UseCors("AllowFrontend");
 app.UseAuthorization();
 app.MapControllers();
 
