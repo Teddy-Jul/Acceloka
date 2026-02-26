@@ -6,10 +6,6 @@ namespace Acceloka.Entities;
 
 public partial class AccelokaContext : DbContext
 {
-    public AccelokaContext()
-    {
-    }
-
     public AccelokaContext(DbContextOptions<AccelokaContext> options)
         : base(options)
     {
@@ -23,6 +19,8 @@ public partial class AccelokaContext : DbContext
 
     public virtual DbSet<Ticket> Tickets { get; set; }
 
+    public virtual DbSet<User> Users { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<BookedTicket>(entity =>
@@ -31,6 +29,10 @@ public partial class AccelokaContext : DbContext
 
             entity.Property(e => e.BookingDate).HasDefaultValueSql("(sysdatetimeoffset())");
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysdatetimeoffset())");
+
+            entity.HasOne(d => d.User).WithMany(p => p.BookedTickets)
+                .HasForeignKey(d => d.UserId)
+                .HasConstraintName("FK_BookedTickets_Users");
         });
 
         modelBuilder.Entity<BookedTicketDetail>(entity =>
@@ -54,27 +56,53 @@ public partial class AccelokaContext : DbContext
 
         modelBuilder.Entity<Category>(entity =>
         {
-            entity.HasKey(e => e.CategoryId).HasName("PK__Categori__19093A0B6E3E0A4E");
+            entity.HasKey(e => e.CategoryId).HasName("PK__Categori__19093A0B6D25907F");
 
-            entity.Property(e => e.CategoryName).HasMaxLength(100);
+            entity.HasIndex(e => e.CategoryName, "UQ_Categories_CategoryName").IsUnique();
+
+            entity.Property(e => e.CategoryName)
+                .HasMaxLength(255)
+                .IsUnicode(false);
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysdatetimeoffset())");
         });
 
         modelBuilder.Entity<Ticket>(entity =>
         {
-            entity.HasKey(e => e.TicketId).HasName("PK__Tickets__712CC607929D3E9A");
+            entity.HasKey(e => e.TicketId).HasName("PK__Tickets__712CC607203EC726");
 
-            entity.HasIndex(e => e.TicketCode, "UQ__Tickets__23DC808FFD0F6FBB").IsUnique();
+            entity.HasIndex(e => e.TicketCode, "UQ_Tickets_TicketCode").IsUnique();
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysdatetimeoffset())");
             entity.Property(e => e.Price).HasColumnType("decimal(18, 2)");
-            entity.Property(e => e.TicketCode).HasMaxLength(50);
-            entity.Property(e => e.TicketName).HasMaxLength(200);
+            entity.Property(e => e.TicketCode)
+                .HasMaxLength(255)
+                .IsUnicode(false);
+            entity.Property(e => e.TicketName)
+                .HasMaxLength(255)
+                .IsUnicode(false);
 
             entity.HasOne(d => d.Category).WithMany(p => p.Tickets)
                 .HasForeignKey(d => d.CategoryId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Tickets_Categories");
+        });
+
+        modelBuilder.Entity<User>(entity =>
+        {
+            entity.HasKey(e => e.UserId).HasName("PK__Users__1788CC4CB862CE38");
+
+            entity.HasIndex(e => e.Username, "UQ_Users_Username").IsUnique();
+
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysdatetimeoffset())");
+            entity.Property(e => e.Email)
+                .HasMaxLength(255)
+                .IsUnicode(false);
+            entity.Property(e => e.Password)
+                .HasMaxLength(255)
+                .IsUnicode(false);
+            entity.Property(e => e.Username)
+                .HasMaxLength(255)
+                .IsUnicode(false);
         });
 
         OnModelCreatingPartial(modelBuilder);

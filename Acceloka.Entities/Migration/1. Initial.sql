@@ -56,6 +56,25 @@ create table BookedTicketDetails(
 	constraint CK_BookedTicketDetails_Price check(price >= 0)
 )
 
+create table Users(
+	UserId int identity(1,1) primary key not null,
+	Username varchar(255) not null,
+	Email varchar(255) not null,
+	Password varchar(255) not null,
+	CreatedAt datetimeoffset not null default sysdatetimeoffset(),
+	UpdatedAt datetimeoffset null,
+
+	constraint UQ_Users_Username unique(Username)
+)
+
+
+alter table BookedTickets
+	add UserId int null
+		constraint FK_BookedTickets_Users foreign key references Users(UserId)
+
+
+
+
 select * from Categories
 select * from Tickets
 select * from BookedTickets
@@ -93,4 +112,9 @@ INSERT INTO Tickets (CategoryId, TicketCode, TicketName, EventDate, Price, Quota
 -- Hotel
 (6, 'HTL001', 'Hotel Mulia Jakarta', '2026-02-25T14:00:00+07:00', 2000000.00, 50, 50),
 (6, 'HTL002', 'Hotel Santika Bali', '2026-03-10T14:00:00+07:00', 800000.00, 100, 100);
+
+insert into Users(Username,Email,password)
+values
+('admin', 'admin@acceloka.com','qwerty'),
+('test','test@acceloka.com', 'qwerty')
 GO

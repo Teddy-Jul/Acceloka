@@ -13,5 +13,9 @@ public partial class BookedTicket
 
     public DateTimeOffset? UpdatedAt { get; set; }
 
+    public int? UserId { get; set; }
+
     public virtual ICollection<BookedTicketDetail> BookedTicketDetails { get; set; } = new List<BookedTicketDetail>();
+
+    public virtual User? User { get; set; }
 }

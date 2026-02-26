@@ -58,6 +58,7 @@ builder.Services.AddProblemDetails(options =>
     options.MapToStatusCode<ValidationException>(StatusCodes.Status400BadRequest);
     options.MapToStatusCode<KeyNotFoundException>(StatusCodes.Status404NotFound);
     options.MapToStatusCode<Exception>(StatusCodes.Status500InternalServerError);
+    options.MapToStatusCode<UnauthorizedAccessException>(StatusCodes.Status401Unauthorized);
 });
 
 builder.Services.AddEntityFrameworkSqlServer();

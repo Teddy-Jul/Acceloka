@@ -29,6 +29,12 @@ namespace Acceloka.Features.BookedTickets.Queries
                 throw new KeyNotFoundException($"BookedTicketId {request.BookedTicketId} not found");
             }
 
+            // Validasi apakah booking milik user yang request
+            if (bookedTicket.UserId != request.UserId)
+            {
+                throw new UnauthorizedAccessException("You are not authorized to view this booking.");
+            }
+
             // Group by Category dan hitung total quantity per kategori
             var response = new GetBookedTicketResponse
             {

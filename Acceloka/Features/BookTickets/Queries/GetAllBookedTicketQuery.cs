@@ -5,5 +5,6 @@ namespace Acceloka.Features.BookedTickets.Queries
 {
     public class GetAllBookedTicketsQuery : IRequest<GetAllBookedTicketsResponse>
     {
+        public int UserId { get; set; }
     }
 }

@@ -68,7 +68,8 @@ namespace Acceloka.Features.BookTicket.Commands
                 var bookedTicket = new BookedTicket
                 {
                     BookingDate = bookingDate,
-                    CreatedAt = bookingDate
+                    CreatedAt = bookingDate,
+                    UserId = request.UserId
                 };
 
                 _db.BookedTickets.Add(bookedTicket);

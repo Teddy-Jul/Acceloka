@@ -19,6 +19,7 @@ namespace Acceloka.Features.BookedTickets.Queries
             // ambil semua booked tickets beserta detailnya
             var bookedTickets = await _db.BookedTickets
                 .Include(bt => bt.BookedTicketDetails)
+                .Where(bt => bt.UserId == request.UserId)
                 .OrderByDescending(bt => bt.BookingDate)
                 .Select(bt => new BookedTicketSummary
                 {
