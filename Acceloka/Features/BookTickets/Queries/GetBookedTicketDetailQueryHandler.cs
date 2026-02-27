@@ -49,7 +49,7 @@ namespace Acceloka.Features.BookedTickets.Queries
                             TicketCode = btd.Ticket.TicketCode,
                             TicketName = btd.Ticket.TicketName,
                             EventDate = btd.Ticket.EventDate,
-                            TicketAmmount = btd.Quantity
+                            TicketAmount = btd.Quantity
                         }).ToList()
                     }).ToList()
             };

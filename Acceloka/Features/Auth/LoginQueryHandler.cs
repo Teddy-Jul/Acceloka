@@ -19,7 +19,9 @@ namespace Acceloka.Features.Auth
                 .FirstOrDefaultAsync(u => u.Email == request.Email, cancellationToken);
 
             if (user == null || user.Password != request.Password)
+            {
                 throw new UnauthorizedAccessException("Invalid email or password.");
+            }
 
             return new LoginResponse { UserId = user.UserId, Username = user.Username };
         }

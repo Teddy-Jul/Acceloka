@@ -18,7 +18,7 @@
         public string TicketCode { get; set; } = string.Empty;
         public string TicketName { get; set; } = string.Empty;
         public DateTimeOffset EventDate { get; set; }
-        public int TicketAmmount { get; set; }
+        public int TicketAmount { get; set; }
     }
     // Get /api/v1/get-all-booked-tickets
     public class GetAllBookedTicketsResponse

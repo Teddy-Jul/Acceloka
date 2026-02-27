@@ -19,7 +19,9 @@ namespace Acceloka.Features.Auth
                 .AnyAsync(u => u.Username == request.Username, cancellationToken);
 
             if (exists)
+            {
                 throw new InvalidOperationException($"Username '{request.Username}' is already taken.");
+            }
 
             var user = new User
             {
